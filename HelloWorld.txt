@@ -125,3 +125,42 @@ int main() {
 
     return 0;
 }
+
+
+#include <stdio.h>
+
+void MinMaxAdresse(int Tab[], int NbElt, int **pAdrMin, int **pAdrMax) {
+    int i;
+    *pAdrMin = &Tab[0];
+    *pAdrMax = &Tab[0];
+
+    for (i = 1; i < NbElt; i++) {
+        if (Tab[i] < **pAdrMin) {
+            *pAdrMin = &Tab[i];
+        }
+        if (Tab[i] > **pAdrMax) {
+            *pAdrMax = &Tab[i];
+        }
+    }
+}
+
+int main() {
+    int Tab[100];
+    int n, i;
+    int *adrMin, *adrMax;
+
+    printf("Combien d'elements ? (max 100) : ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        printf("Tab[%d] = ", i);
+        scanf("%d", &Tab[i]);
+    }
+
+    MinMaxAdresse(Tab, n, &adrMin, &adrMax);
+
+    printf("Adresse du min : %p -> valeur = %d\n", (void *)adrMin, *adrMin);
+    printf("Adresse du max : %p -> valeur = %d\n", (void *)adrMax, *adrMax);
+
+    return 0;
+}
