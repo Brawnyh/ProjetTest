@@ -90,3 +90,38 @@ int main() {
 
     return 0;
 }Hello world
+
+
+
+#include <stdio.h>
+
+void Convertir1(int secondes, int *heures, int *minutes, int *secs) {
+    *heures = secondes / 3600;
+    secondes = secondes % 3600;
+    *minutes = secondes / 60;
+    *secs = secondes % 60;
+}
+
+void Convertir2(int secondes, int tab[3]) {
+    tab[0] = secondes / 3600;
+    secondes = secondes % 3600;
+    tab[1] = secondes / 60;
+    tab[2] = secondes % 60;
+}
+
+int main() {
+    int secondes;
+    int h, m, s;
+    int tab[3];
+
+    printf("Entrez une duree en secondes : ");
+    scanf("%d", &secondes);
+
+    Convertir1(secondes, &h, &m, &s);
+    printf("Avec Convertir1 : %d h %d min %d s\n", h, m, s);
+
+    Convertir2(secondes, tab);
+    printf("Avec Convertir2 : %d h %d min %d s\n", tab[0], tab[1], tab[2]);
+
+    return 0;
+}
