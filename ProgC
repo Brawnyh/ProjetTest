@@ -1,44 +1,133 @@
-código C
+#include <stdio.h>
 
-Université de Toulouse Programmation C – TP 5
-SÉANCE 5
-i Objectif
-Le but de cette séance est de continuer le travail sur les fonctions et le passage de paramètres avec
-l’utilisation des pointeurs, de manipuler des chaînes de caractères et d’introduire la gestion dynamique
-des tableaux. Nous vous rappelons que du travail personnel, en dehors des séances, est
-indispensable.
-Consigne pour cette séance : pour ceux qui n’ont pas terminé la séance 4, terminez-la et n’oubliez
-pas d’appeler l’enseignant·e en cas de difficulté ; passez ensuite à l’exercice 1 ci-dessous.
-Ï Exercices
-Z Exercice 1 (Fonctions de manipulation de chaînes de caractères)
-L’objectif de cet exercice consiste à écrire des fonctions de manipulation de chaînes de caractères sans
-utiliser les fonctions de la bibliothèque standard (donc sans inclure string.h).
-Testez les unes après les autres les fonctions en utilisant la fonction principale fournie dans le fichier
-tp5ex1main.c et en enlevant les commentaires au fur et à mesure de votre progression.
-Dans la suite, une chaîne de caractères est manipulée au travers de l’adresse de son premier caractère
-(adresse de début de la chaîne).
-1. Écrivez la fonction d’en-tête :
+#define MAX 80
+
+/* Lecture d'une ligne de texte tapee au clavier
+ * ch : adresse du premier caractere de la chaine
+ * NbCarMax : nombre maximal de caracteres lus (pour eviter les
+ *   debordements en memoire)
+ * Valeur de retour : nombre de caracteres lus
+ */
 int Lecture(char *ch, int NbCarMax)
-qui lit une ligne de texte tapée au clavier et la stocke, en ajoutant le caractère ’\0’ mais sans
-stocker le caractère ’\n’, dans la chaîne désignée par le paramètre ch. Le paramètre NbCarMax
-contient le nombre maximal de caractères lus (pour éviter les débordements en mémoire). La
-fonction doit retourner le nombre de caractères lus (sans compter le caractère ’\n’).
-Vous pouvez vous inspirer de ce que vous avez écrit pour l’exercice 3 de la séance 3.
-2. Écrivez la fonction d’en-tête :
+{
+    int i = 0;
+    char c;
+
+    c = getchar();
+    while (c != '\n' && i < NbCarMax) {
+        ch[i] = c;
+        i++;
+        c = getchar();
+    }
+    ch[i] = '\0';  // fin de chaîne
+    return i;       // nombre de caractères lus (hors '\n')
+}
+
+/* Longueur d'une chaine de caracteres */
 int Longueur(char *ch)
-qui retourne la longueur (nombre de caractères sans compter le caractère ’\0’) de la chaîne
-dont l’adresse du premier caractère est passée en paramètre.
-3. Écrivez la fonction d’en-tête :
+{
+    int i = 0;
+    while (ch[i] != '\0') {
+        i++;
+    }
+    return i;
+}
+
+/* Copie d'une chaine dans une autre */
 void Copie(char *Destination, char *Source)
-qui copie la chaîne de caractères désignée par le paramètre Source dans la chaîne désignée par
-le paramètre Destination. Attention, la copie doit être une « vraie » chaîne de caractères,
-c’est-à-dire se terminer par ’\0’.
-4. Écrivez la fonction d’en-tête :
+{
+    int i = 0;
+    while (Source[i] != '\0') {
+        Destination[i] = Source[i];
+        i++;
+    }
+    Destination[i] = '\0';
+}
+
+/* Comparaison de deux chaines de caracteres
+ * retourne 1 si differentes, 0 si identiques
+ */
 int Differentes(char *ch1, char *ch2)
-qui retourne 1 si les chaînes désignées par ch1 et ch2 sont différentes (contiennent au moins un
-caractère différent), 0 sinon.
-5. Écrivez la fonction d’en-tête :
+{
+    int i = 0;
+    while (ch1[i] != '\0' && ch2[i] != '\0') {
+        if (ch1[i] != ch2[i]) {
+            return 1;
+        }
+        i++;
+    }
+    if (ch1[i] == '\0' && ch2[i] == '\0') {
+        return 0;  // identiques
+    } else {
+        return 1;  // longueurs differentes
+    }
+}
+
+/* Ajout (concatenation) d'une chaine a la fin d'une autre */
 void Ajout(char *Destination, char *Source)
-qui ajoute la chaîne de caractères désignée par Source à la fin de la chaîne de caractères désignée
-par Destination.
-Alain Crouzil, Emmanuel Lavinal 1/2 Semestre impair 2025-2026
+{
+    int i = 0;
+    int j = 0;
+
+    while (Destination[i] != '\0') {
+        i++;
+    }
+    while (Source[j] != '\0') {
+        Destination[i] = Source[j];
+        i++;
+        j++;
+    }
+    Destination[i] = '\0';
+}
+
+/* Fonction principale (tests) */
+int main(void)
+{
+  printf("Test de Lecture\n---------------\n");
+  printf("Tapez une chaine d'au plus %d caracteres : ",MAX);
+  char ch1[MAX+1];
+  int n;
+  n=Lecture(ch1,MAX);
+  printf("La chaine \"%s\" a ete lue ; elle contient %d caracteres.\n",ch1,n);
+
+  printf("\nTest de Longueur\n----------------\n");
+  printf("La chaine \"%s\" contient %d caracteres.\n",ch1,Longueur(ch1));
+
+  printf("\nTest de copie\n-------------\n");
+  char ch2[2*MAX+1];
+  Copie(ch2,ch1);
+  printf("ch1=\"%s\", ch2=\"%s\"\n",ch1,ch2);
+
+  printf("\nTest de Differentes\n-------------------\n");
+  char ch3[MAX+1]="o";
+  while (Differentes(ch3,"n"))
+  {
+    printf("Tapez une premiere chaine : ");
+    Lecture(ch1,MAX);
+    printf("Tapez une seconde chaine : ");
+    Lecture(ch2,MAX);
+    if (Differentes(ch1,ch2))
+      printf("%s et %s ne contiennent pas les memes caracteres.\n",ch1,ch2);
+    else
+      printf("%s et %s contiennent les memes caracteres.\n",ch1,ch2);
+    printf("Voulez-vous continuer le test de Differentes (tapez n pour arreter) : ");
+    Lecture(ch3,1);
+  }
+
+  printf("\nTest de Ajout\n-------------\n");
+  Copie(ch3,"o");
+  while (Differentes(ch3,"n"))
+  {
+    printf("Tapez une premiere chaine : ");
+    Lecture(ch1,MAX);
+    printf("Tapez une seconde chaine : ");
+    Lecture(ch2,MAX);
+    printf("Ajout de la premiere chaine a la seconde :\n");
+    Ajout(ch2,ch1);
+    printf("ch1=\"%s\", ch2=\"%s\"\n",ch1,ch2);
+    printf("Voulez-vous continuer le test de Ajout (tapez n pour arreter) : ");
+    Lecture(ch3,1);
+  }
+
+  return 0;
+}
