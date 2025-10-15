@@ -131,3 +131,62 @@ int main(void)
 
   return 0;
 }
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Alloue un tableau de NbElts doubles */
+double *CreerTableau(int NbElts) {
+    double *Tab;
+    Tab = (double *) malloc(NbElts * sizeof(double));
+    if (Tab == NULL) {
+        printf("Erreur : allocation memoire echouee.\n");
+    }
+    return Tab;
+}
+
+/* Saisie d'un tableau */
+void SaisirTableau(double *Tab, int NbElts) {
+    int i;
+    for (i = 0; i < NbElts; i++) {
+        printf("Tab[%d] = ", i);
+        scanf("%lf", &Tab[i]);
+    }
+}
+
+/* Affichage d'un tableau */
+void AfficherTableau(double *Tab, int NbElts) {
+    int i;
+    printf("Contenu du tableau : ");
+    for (i = 0; i < NbElts; i++) {
+        printf("%lf ", Tab[i]);
+    }
+    printf("\n");
+}
+
+/* Liberation du tableau */
+void LibererTableau(double *Tab) {
+    free(Tab);
+}
+
+int main() {
+    int n;
+    double *Tab;
+
+    printf("Combien de valeurs voulez-vous saisir ? ");
+    scanf("%d", &n);
+
+    Tab = CreerTableau(n);
+    if (Tab == NULL) {
+        return 1; // on sort si echec malloc
+    }
+
+    SaisirTableau(Tab, n);
+    AfficherTableau(Tab, n);
+
+    LibererTableau(Tab);
+
+    return 0;
+}
