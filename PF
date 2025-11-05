@@ -133,10 +133,28 @@ Computing surcharge [('a', true); ('b', false)] [('b', true)]
 
 
 let surcharge f1 f2 =
-  let rec aux l =
+  let rec memfst x l =
+    match l with
+    | [] -> false
+    | (a,_)::xs -> a = x || memfst x xs
+  in
+  let rec ajout_f2 l =
     match l with
     | [] -> []
-    | (x,y)::xs -> (x,y) :: aux (List.filter (fun (a,_) -> a <> x) xs)
+    | (x,y)::xs -> (x,y) :: ajout_f2 xs
   in
-  aux (f1 @ f2)
+  let rec ajout_f1 l acc =
+    match l with
+    | [] -> acc
+    | (x,y)::xs ->
+        if memfst x f2 then ajout_f1 xs acc
+        else ajout_f1 xs ((x,y)::acc)
+  in
+  let base = ajout_f2 f2 in
+  let rec rev l acc =
+    match l with
+    | [] -> acc
+    | x::xs -> rev xs (x::acc)
+  in
+  rev (ajout_f1 f1 base) []
 ;;
