@@ -1,140 +1,122 @@
-let rec hanoi (src, tmp, dst) n =
+
+let rec hanoi (src,tmp,dst) n =
   if n <= 0 then []
   else
-    let before = hanoi (src, dst, tmp) (n - 1) in
-    let move   = [(src, dst)] in
-    let after  = hanoi (tmp, src, dst) (n - 1) in
-
-    (* Construcción manual sin usar @ *)
-    let rec concat l1 l2 =
-      match l1 with
-      | [] -> l2
-      | x :: xs -> x :: concat xs l2
+    let m1 = hanoi (src,dst,tmp) (n-1) in
+    let m2 = [(src,dst)] in
+    let m3 = hanoi (tmp,src,dst) (n-1) in
+    let rec concat a b =
+      match a with
+      | [] -> b
+      | x::xs -> x :: concat xs b
     in
+    concat m1 (concat m2 m3)
 
-    concat before (concat move after)
-;;
-
-
-List.length (hanoi (1,2,3) 3);;
-
-
+(* B. LISTES *)
 let rec somme l =
   match l with
   | [] -> 0
-  | x :: xs -> x + somme xs
-;;
+  | x::xs -> x + somme xs
 
 let rec dernier l =
   match l with
-  | [] -> failwith "Lista vacía"
+  | [] -> failwith "liste vide"
   | [x] -> x
-  | _ :: xs -> dernier xs
-;;
+  | _::xs -> dernier xs
 
 let rec map f l =
   match l with
   | [] -> []
-  | x :: xs -> (f x) :: map f xs
-;;
+  | x::xs -> f x :: map f xs
 
-
+(* C. TRI *)
 let rec inserer x l =
   match l with
   | [] -> [x]
-  | y :: ys -> if x <= y then x :: l else y :: inserer x ys
-;;
+  | y::ys -> if x <= y then x::l else y::inserer x ys
 
 let rec triInsertion l =
   match l with
   | [] -> []
-  | x :: xs -> inserer x (triInsertion xs)
-;;
-
+  | x::xs -> inserer x (triInsertion xs)
 
 let rec partage l =
   match l with
-  | [] -> ([], [])
-  | [x] -> ([x], [])
-  | x :: y :: xs ->
-      let (l1, l2) = partage xs in
-      (x :: l1, y :: l2)
-;;
+  | [] -> ([],[])
+  | [x] -> ([x],[])
+  | x::y::xs ->
+    let (l1,l2) = partage xs in
+    (x::l1,y::l2)
 
 let rec merge l1 l2 =
-  match l1, l2 with
-  | [], l | l, [] -> l
-  | x :: xs, y :: ys ->
-      if x <= y
-      then x :: merge xs l2
-      else y :: merge l1 ys
-;;
+  match l1,l2 with
+  | [],l | l,[] -> l
+  | x::xs,y::ys ->
+    if x <= y then x :: merge xs l2 else y :: merge l1 ys
 
 let rec triFusion l =
   match l with
   | [] | [_] -> l
   | _ ->
-      let (l1, l2) = partage l in
-      merge (triFusion l1) (triFusion l2)
-;;
+    let (l1,l2) = partage l in
+    merge (triFusion l1) (triFusion l2)
 
+(* D. REPRESENTATION DE FONCTIONS *)
+let fst (a,_) = a
+let snd (_,b) = b
 
-let fst (a, _) = a;;
-let snd (_, b) = b;;
-
-
-let estFonction l =
-  let rec aux vues = function
+let estFonction f =
+  let rec aux vus f =
+    match f with
     | [] -> true
-    | (x, _) :: xs ->
-        if List.mem x vues then false
-        else aux (x :: vues) xs
-  in aux [] l
-;;
-
-let rec image x l =
-  match l with
-  | [] -> failwith "No tiene imagen"
-  | (a, b) :: xs -> if a = x then b else image x xs
-;;
-
-let estInjective f =
-  let rec aux imgs = function
-    | [] -> true
-    | (_, y) :: xs ->
-        if List.mem y imgs then false
-        else aux (y :: imgs) xs
+    | (x,_)::xs -> not (List.mem x vus) && aux (x::vus) xs
   in aux [] f
-;;
 
+let rec image x f =
+  match f with
+  | [] -> failwith "pas d'image"
+  | (a,b)::xs -> if a = x then b else image x xs
 
 let rec imageEns l f =
   match l with
   | [] -> []
-  | x :: xs -> (image x f) :: imageEns xs f
-;;
+  | x::xs -> image x f :: imageEns xs f
+
+let estInjective f =
+  let rec aux vus f =
+    match f with
+    | [] -> true
+    | (_,y)::xs -> not (List.mem y vus) && aux (y::vus) xs
+  in aux [] f
 
 let surcharge f1 f2 =
-  let rec aux = function
+  let rec aux f2 =
+    match f2 with
     | [] -> f1
-    | (x, y) :: xs ->
-        let f1' = List.filter (fun (a, _) -> a <> x) f1 in
-        (x, y) :: aux xs
+    | (x,y)::xs ->
+      let f1' = List.filter (fun (a,_) -> a <> x) f1 in
+      (x,y) :: aux xs
   in aux f2
-;;
-
 
 let composition f1 f2 =
-  let rec aux = function
+  let rec aux f2 =
+    match f2 with
     | [] -> []
-    | (x, y) :: xs ->
-        if List.exists (fun (a, _) -> a = y) f1
-        then (x, image y f1) :: aux xs
-        else aux xs
+    | (x,y)::xs ->
+      if List.exists (fun (a,_) -> a = y) f1
+      then (x, image y f1) :: aux xs
+      else aux xs
   in aux f2
-;;
-
 
 let produit f1 f2 =
-  List.map (fun (x, y) -> (x, image x f1, image y f2)) []
-;;
+  let rec img1 x f =
+    match f with
+    | [] -> failwith "pas d'image"
+    | (a,b)::xs -> if x = a then b else img1 x xs
+  in
+  let rec img2 y f =
+    match f with
+    | [] -> failwith "pas d'image"
+    | (a,b)::xs -> if y = a then b else img2 y xs
+  in
+  fun (x,y) -> (img1 x f1, img2 y f2)
