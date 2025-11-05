@@ -1,4 +1,5 @@
 
+
 let rec hanoi (src,tmp,dst) n =
   if n <= 0 then []
   else
@@ -157,4 +158,26 @@ let surcharge f1 f2 =
     | x::xs -> rev xs (x::acc)
   in
   rev (ajout_f1 f1 base) []
+;;
+
+
+let produit f1 f2 =
+  let rec aux1 f1 =
+    match f1 with
+    | [] -> []
+    | (x, vx)::xs ->
+        let rec aux2 f2 =
+          match f2 with
+          | [] -> []
+          | (y, vy)::ys ->
+              ( (x,y), (vx,vy) ) :: aux2 ys
+        in
+        let r1 = aux2 f2 in
+        let r2 = aux1 xs in
+        let rec concat a b =
+          match a with
+          | [] -> b
+          | t::ts -> t :: concat ts b
+        in concat r1 r2
+  in aux1 f1
 ;;
