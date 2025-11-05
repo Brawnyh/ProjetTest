@@ -1,105 +1,126 @@
-TP4 - Fonctions récursives et listes
-N'hésitez pas à solliciter votre encadrant pour toute question durant la séance, en cas de doute, ou pour lui demander une revue de votre code.
+let rec hanoi (source, temp, dest) n =
+  if n <= 0 then []
+  else
+    (* Mover n-1 discos a la torre temporal *)
+    hanoi (source, dest, temp) (n - 1)
+    @ [(source, dest)]  (* Mover un disco *)
+    @ hanoi (temp, source, dest) (n - 1)  (* Mover n-1 discos a destino *)
+;;
 
-(Alternativement, vous pouvez aussi cliquer sur le bouton Noter! (qui ressemble au bouton Sync mais envoie sur la plateforme Learn-OCaml votre code + le résultat des tests) et demander à votre encadrant qu'il relise votre code dans le dashboard enseignant.)
 
-Rappels sur les listes
-On rappelle que :
+List.length (hanoi (1,2,3) 3);;
 
-le type des listes d'éléments de type 'e s'écrit 'e list
-les listes sont construites via les constructeurs [] (liste vide) et e :: l (empilement d'un élément e devant une liste donnée l)
-les listes peuvent être parcourues en utilisant la récursion et le filtrage, typiquement :
-let rec fonction liste = match liste with | [] -> … | e :: l -> …
-vous avez (re)défini en cours la fonction "append" permettant de concaténer deux listes :
-cette fonction existe dans la bibliothèque standard sous la forme de l'opérateur infixe ( @ ) (ou encore de la fonction List.append).
-Listes et récursion
-Exercice A - Tours de Hanoï
-Le problème des tours de Hanoï est un jeu de réflexion imaginé par le mathématicien français Édouard Lucas. C'est un très bon exemple pour illustrer l'expressivité de la récursivité (s'agissant ici, de la récursivité sur les entiers : les listes ne seront utilisées qu'en résultat).
 
-Le but du jeu est de déplacer des disques de diamètres différents d'une tour de départ (Tour 1) à une tour de destination (Tour 3) en passant par une tour intermédiaire (Tour 2).
+let rec somme l =
+  match l with
+  | [] -> 0
+  | x :: xs -> x + somme xs
+;;
 
-Image Tower_of_Hanoi
+let rec dernier l =
+  match l with
+  | [] -> failwith "Lista vacía"
+  | [x] -> x
+  | _ :: xs -> dernier xs
+;;
 
-Les règles de jeu sont les suivantes :
+let rec map f l =
+  match l with
+  | [] -> []
+  | x :: xs -> (f x) :: map f xs
+;;
 
-Ne déplacer qu'un disque à la fois.
-Un disque ne peut être déplacé que si l'emplacement est vide ou si le disque de réception est plus grand.
-1*. En raisonnant de manière récursive, écrire la fonction hanoi qui prend en argument un triplet (source, temp, dest) de 3 paramètres supposés différents (qui identifient les tours) ainsi que le nombre n de disques, et renvoie la liste des mouvements définis par des couples
 
-(identifiant de la tour de départ, identifiant de la tour d’arrivée).
-Votre fonction devra avoir le type
+let rec inserer x l =
+  match l with
+  | [] -> [x]
+  | y :: ys -> if x <= y then x :: l else y :: inserer x ys
+;;
 
-hanoi : 'a * 'a * 'a -> int -> ('a * 'a) list
-Indication : Voici le résultat de hanoi sur un exemple :
+let rec triInsertion l =
+  match l with
+  | [] -> []
+  | x :: xs -> inserer x (triInsertion xs)
+;;
 
-hanoi (1,2,3) 2 = [(1, 2); (1, 3); (2, 3)]
-En cas d'argument n non valide (p.ex. hanoi (1,2,3) (-1)), votre fonction devra juste renvoyer la liste vide.
 
-2*. Quelle est la longueur de la liste (hanoi (a, b, c) n) en fonction de n ? (Réponse à faire valider par votre encadrant.)
+let rec partage l =
+  match l with
+  | [] -> ([], [])
+  | [x] -> ([x], [])
+  | x :: y :: xs ->
+      let (l1, l2) = partage xs in
+      (x :: l1, y :: l2)
+;;
 
-Exercice B : fonctions usuelles sur les listes
-1. Ecrire la fonction somme : int list -> int,
-qui prend en argument une liste d'entiers, et renvoie la somme de tous les éléments
-de cette liste, et renvoie 0 si la liste est vide.
+let rec merge l1 l2 =
+  match l1, l2 with
+  | [], l | l, [] -> l
+  | x :: xs, y :: ys ->
+      if x <= y
+      then x :: merge xs l2
+      else y :: merge l1 ys
+;;
 
-2. Ecrire la fonction dernier : 'a list -> 'a,
-qui prend en argument une liste, et renvoie le dernier élément de cette liste s'il existe, sinon, renvoie une exception.
+let rec triFusion l =
+  match l with
+  | [] | [_] -> l
+  | _ ->
+      let (l1, l2) = partage l in
+      merge (triFusion l1) (triFusion l2)
+;;
 
-3. Écrire la fonction map : ('a -> 'b) -> 'a list -> 'b list,
-qui prend en argument une fonction et une liste, et renvoie la liste résultant de l'application de la fonction à chaque élément
-(en préservant l'ordre des éléments dans la liste résultat).
 
-4*. Quelle est la longueur de la liste (map f l) en fonction de la longueur de l ? (Réponse à faire valider par votre encadrant.)
+let fst (a, _) = a;;
+let snd (_, b) = b;;
 
-5*. En Cours/TD, vous avez pu implémenter les fonctions filtrer, qquesoit, existe.
 
-Ces fonctions pré-existent dans la bibliothèque standard, avec un nom anglais :
+let estFonction l =
+  let rec aux vues = function
+    | [] -> true
+    | (x, _) :: xs ->
+        if List.mem x vues then false
+        else aux (x :: vues) xs
+  in aux [] l
+;;
 
-List.filter : ('a -> bool) -> 'a list -> 'a list
-List.for_all : ('a -> bool) -> 'a list -> bool
-List.exists : ('a -> bool) -> 'a list -> bool
-Tester un minimum l'utilisation de ces trois fonctions dans le toplevel, en utilisant par exemple la liste :
+let rec image x l =
+  match l with
+  | [] -> failwith "No tiene imagen"
+  | (a, b) :: xs -> if a = x then b else image x xs
+;;
 
-let ltest = [1; 2; 0; 4; -1; 5; 2]
-et les prédicats :
+let estInjective f =
+  let rec aux imgs = function
+    | [] -> true
+    | (_, y) :: xs ->
+        if List.mem y imgs then false
+        else aux (y :: imgs) xs
+  in aux [] f
+;;
 
-(fun n -> n mod 2 = 0),
-(fun n -> n > -2)
-Exercice C - Tris
-Dans cet exercice deux algorithmes de tri sont a réaliser. Le tri doit être croissant et porte sur une liste de valeurs de type 'a.
 
-1) Tri par insertion : Écrire la fonction inserer qui, étant donné une valeur et une liste déjà triée, construit la liste où la valeur est insérée en bonne position dans la liste. En déduire une fonction triInsertion qui trie une liste de valeurs dans l’ordre croissant.
+let surcharge f1 f2 =
+  let rec aux = function
+    | [] -> f1
+    | (x, y) :: xs ->
+        let f1' = List.filter (fun (a, _) -> a <> x) f1 in
+        (x, y) :: aux xs
+  in aux f2
+;;
 
-2) Tri par fusion : Écrire la fonction partage qui partage une liste en deux listes l1 et l2 telles que les tailles de l1 et l2 ne diffèrent que d’un au maximum. Écrire une fonction merge qui prend en argument deux listes ordonnées de valeurs et renvoie une liste ordonnée (vous ne devrez pas utiliser la fonction inserer pour cette fonction). En déduire une fonction triFusion qui trie une liste de valeurs dans l’ordre croissant.
 
-Exercice D - Représentation d’une fonction unaire
-On considère des fonctions unaires qui sont représentées uniquement sur un domaine fini, par une liste de couples donnant pour chaque valeur de x (dans ce domaine fini) son image par la fonction.
+let composition f1 f2 =
+  let rec aux = function
+    | [] -> []
+    | (x, y) :: xs ->
+        if List.exists (fun (a, _) -> a = y) f1
+        then (x, image y f1) :: aux xs
+        else aux xs
+  in aux f2
+;;
 
-Par exemple, la fonction f sur l’intervalle [1,5] t.q. f(x) = 2x + 1 est représentée par la liste de couples :
 
-[(1,3) ; (2,5) ; (3,7) ; (4,9) ; (5,11)]
-Notez que l'ordre des couples dans une telle liste est indifférent car la notion mathématique sous-jacente est juste un ensemble de couples (donc les listes considérées ne seront pas forcément "triées" dans cet exercice).
-
-Notez également que, pour representer correctement une fonction, les premiers éléments des couples, doivent être tous différents.
-
-0) Écrire les fonctions fst et snd renvoyant la première composante (resp. la seconde composante) d'un couple.
-
-1) Écrire une fonction estFonction qui, étant donnée une liste de couples, vérifie que la liste des premiers éléments ne contient pas de duplication.
-
-On suppose maintenant qu’on a bien des fonctions.
-
-2) Écrire la fonction image qui, étant donnés un élément et une liste de couples (représentant f) renvoie la valeur associée à l’élément si elle existe. Une exception sera levée avec failwith si l'élément n'a pas d'image.
-
-3) Écrire la fonction imageEns qui, étant données une liste d’éléments l et une liste de couples (représentant une fonction f) renvoie la liste des valeurs associées à chaque élément de l. On supposera, sans le vérifier, que les éléments de la liste l sont bien dans le "domaine de définition" de f.
-
-Indication : vous pouvez utiliser la fonction précédente.
-
-4) Écrire estInjective qui appliquée à une fonction f représentée par une liste de couples vérifie que deux éléments n’ont pas la même image.
-
-5) Écrire la fonction surcharge prenant 2 listes représentant les fonctions f1 et f2 et renvoyant une liste représentant la fonction f définie sur l’union des domaines de définition de f1 et f2 et dont l’image d’un élément est donnée soit par f1, soit par f2 en donnant priorité à f2.
-
-6) Écrire la fonction composition prenant 2 listes représentant les fonctions f1 et f2 et renvoyant une liste représentant la fonction f dont l’image d’un élément est donnée par f1 appliquée à l’image par f2 de cet élément.
-Cette fonction correspond à l'opération de composition de fonctions f1 o f2, et ne devra pas lever d'exception si "f2(x)" n'a pas d'image par la fonction f1. En effet dans ce cas de figure, il n'y a "pas d'erreur" d'un point de vue mathématique : c'est juste que la fonction composée f1 o f2 n'est pas définie en x.
-Indication : définir une fonction auxiliaire isDef indiquant si un élément x possède une image par une fonction f.
-
-7) Écrire la fonction produit prenant en argument deux listes représentant deux fonctions f1 et f2 et renvoyant la liste représentant la fonction qui à un couple (x,y) associe le couple (f1 x, f2 y).
+let produit f1 f2 =
+  List.map (fun (x, y) -> (x, image x f1, image y f2)) []
+;;
