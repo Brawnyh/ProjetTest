@@ -108,6 +108,12 @@ let estInjective f =
 ;;
 
 
+let rec imageEns l f =
+  match l with
+  | [] -> []
+  | x :: xs -> (image x f) :: imageEns xs f
+;;
+
 let surcharge f1 f2 =
   let rec aux = function
     | [] -> f1
