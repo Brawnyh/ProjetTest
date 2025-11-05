@@ -1,10 +1,18 @@
-let rec hanoi (source, temp, dest) n =
+let rec hanoi (src, tmp, dst) n =
   if n <= 0 then []
   else
-    (* Mover n-1 discos a la torre temporal *)
-    hanoi (source, dest, temp) (n - 1)
-    @ [(source, dest)]  (* Mover un disco *)
-    @ hanoi (temp, source, dest) (n - 1)  (* Mover n-1 discos a destino *)
+    let before = hanoi (src, dst, tmp) (n - 1) in
+    let move   = [(src, dst)] in
+    let after  = hanoi (tmp, src, dst) (n - 1) in
+
+    (* Construcción manual sin usar @ *)
+    let rec concat l1 l2 =
+      match l1 with
+      | [] -> l2
+      | x :: xs -> x :: concat xs l2
+    in
+
+    concat before (concat move after)
 ;;
 
 
