@@ -132,3 +132,11 @@ Computing surcharge [('a', true); ('b', false)] [('b', true)]
 0 ptWrong value [('b', true); ('a', true); ('b', false)]
 
 
+let surcharge f1 f2 =
+  let rec aux l =
+    match l with
+    | [] -> []
+    | (x,y)::xs -> (x,y) :: aux (List.filter (fun (a,_) -> a <> x) xs)
+  in
+  aux (f1 @ f2)
+;;
