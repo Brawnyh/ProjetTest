@@ -120,3 +120,15 @@ let produit f1 f2 =
     | (a,b)::xs -> if y = a then b else img2 y xs
   in
   fun (x,y) -> (img1 x f1, img2 y f2)
+
+
+errores:
+ptWrong value [(0, 9); (0, 0); (1, 1)]
+
+Found surcharge with compatible type.
+
+Computing surcharge [('a', true); ('b', false)] [('b', true)]
+
+0 ptWrong value [('b', true); ('a', true); ('b', false)]
+
+
