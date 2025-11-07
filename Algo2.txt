@@ -46,17 +46,20 @@ def cubes(n: int) -> int:
 
     return t
 
-
+Se usa cntrl+s +cntrl +r
 #@ function abs(n:int) -> int = if n >= 0 then n else -n
 
 def min_abs(a: int, b: int, c: int) -> int:
-    #@ ensures abs(result) <= abs(a)
-    #@ ensures abs(result) <= abs(b)
-    #@ ensures abs(result) <= abs(c)
+    #@ ensures result <= abs(a)
+    #@ ensures result <= abs(b)
+    #@ ensures result <= abs(c)
+    #@ ensures result == abs(c) or result == abs(b) or result == abs(a)
+    pass
+ 
+        
+        
+r = min_abs (5,8,2)
+#@ assert r == 2
 
-    if abs(a) <= abs(b) and abs(a) <= abs(c):
-        return abs(a)
-    elif abs(b) <= abs(a) and abs(b) <= abs(c):
-        return abs(b)
-    else:
-        return abs(c)
+r = min_abs (-2,-4,-6)
+#@ assert r == 2
