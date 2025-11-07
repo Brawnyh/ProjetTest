@@ -1,0 +1,29 @@
+#@ function cubes_carre(n:int)->int = (n*n *( n+1)*(n+1))// 4
+
+
+def cubes(n:int) -> int:
+    #@ requires n>=0
+    #@ ensures result == cubes_carre(n)
+    t=0
+    for i in range(n):
+        t+=i*i*i
+    return t
+ 
+r = cubes(0)
+#@ assert (r==1)
+r= cubes ( 1 )
+#@ assert r==1
+r = cubes( 2 )
+#@ assert r==9
+r = cubes (3)
+#@ assert r==36
+r = cubes(4)
+#@ assert r==100
+
+# c o n t r e e x e m p l e s
+r = cubes (7)
+#@ assert r!=26
+r = cubes ( 8 )
+#@ assert r!= 21
+r = cubes(9)
+#@ assert r!= 13
