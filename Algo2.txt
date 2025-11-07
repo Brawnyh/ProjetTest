@@ -27,3 +27,36 @@ r = cubes ( 8 )
 #@ assert r!= 21
 r = cubes(9)
 #@ assert r!= 13
+
+
+#@ predicate cubes_pre(n:int) = (n >= 0)
+#@ function cubes_carre(n:int) -> int = (n*n*(n+1)*(n+1)) // 4
+
+def cubes(n: int) -> int:
+    #@ requires cubes_pre(n)
+    #@ ensures result == cubes_carre(n)
+
+    t = 0
+    i = 0
+    while i <= n:
+        #@ invariant 0 <= i <= n+1
+        #@ invariant t == cubes_carre(i-1) if i > 0 else t == 0
+        t = t + i*i*i
+        i = i + 1
+
+    return t
+
+
+#@ function abs(n:int) -> int = if n >= 0 then n else -n
+
+def min_abs(a: int, b: int, c: int) -> int:
+    #@ ensures abs(result) <= abs(a)
+    #@ ensures abs(result) <= abs(b)
+    #@ ensures abs(result) <= abs(c)
+
+    if abs(a) <= abs(b) and abs(a) <= abs(c):
+        return abs(a)
+    elif abs(b) <= abs(a) and abs(b) <= abs(c):
+        return abs(b)
+    else:
+        return abs(c)
