@@ -94,3 +94,6 @@ r = fib_iter(4)
 #@ assert r == 3
 r = fib_iter(5)
 #@ assert r == 5
+
+#@ function fib(n:int) -> int = 0 if n == 0 else 1 if n == 1 else fib(n-1) + fib(n-2)
+#@ lemma ocagne: forall n. n >= 2 -> fib(n)*fib(n) - fib(n-1)*fib(n+1) == (-1)**(n+1)
