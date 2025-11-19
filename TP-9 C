@@ -1,3 +1,264 @@
+#image.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "image.h"
+#include "matrice.h"
+
+/* ------------------------------
+   Cree une image vide L x C
+--------------------------------*/
+tImage CreerImage(int L, int C){
+    tImage Im;
+    Im = (tImage) malloc(sizeof(struct sImage));
+    if (Im == NULL) return NULL;
+
+    Im->L = L;
+    Im->C = C;
+
+    Im->pixel = MatAllouer(L, C);
+    if (Im->pixel == NULL){
+        free(Im);
+        return NULL;
+    }
+
+    return Im;
+}
+
+/* --------------------------------
+   Détruit l'image et sa matrice
+---------------------------------*/
+void DetruireImage(tImage *pIm){
+    if (pIm != NULL && *pIm != NULL){
+        MatLiberer(&((*pIm)->pixel));
+        free(*pIm);
+        *pIm = NULL;
+    }
+}
+
+/* --------------------------------
+   Lire un fichier PGM (format P2)
+---------------------------------*/
+tImage LireImage(char nom[]){
+    FILE *f;
+    char magic[3];
+    int L, C, max;
+    int i, j;
+    tImage Im;
+
+    f = fopen(nom, "r");
+    if (f == NULL){
+        printf("Erreur ouverture fichier.\n");
+        return NULL;
+    }
+
+    /* Lire le “P2” */
+    fscanf(f, "%s", magic);
+    if (magic[0] != 'P' || magic[1] != '2'){
+        printf("Format PGM non supporte.\n");
+        fclose(f);
+        return NULL;
+    }
+
+    /* Lire dimensions */
+    fscanf(f, "%d", &C);   // nb colonnes
+    fscanf(f, "%d", &L);   // nb lignes
+
+    /* Lire valeur max */
+    fscanf(f, "%d", &max);
+
+    /* Creation image */
+    Im = CreerImage(L, C);
+    if (Im == NULL){
+        fclose(f);
+        return NULL;
+    }
+
+    /* Lire pixels */
+    for (i = 0; i < L; i++){
+        for (j = 0; j < C; j++){
+            int g;
+            fscanf(f, "%d", &g);
+            EcrirePixel(Im, i, j, (unsigned char)g);
+        }
+    }
+
+    fclose(f);
+    return Im;
+}
+
+/* --------------------------------
+   Ecrire un fichier PGM en P2
+---------------------------------*/
+int EcrireImage(tImage Im, char nom[]){
+    FILE *f;
+    int i, j;
+
+    f = fopen(nom, "w");
+    if (f == NULL){
+        printf("Erreur creation fichier.\n");
+        return 0;
+    }
+
+    fprintf(f, "P2\n");
+    fprintf(f, "%d %d\n", Im->C, Im->L);
+    fprintf(f, "255\n");
+
+    for (i = 0; i < Im->L; i++){
+        for (j = 0; j < Im->C; j++){
+            fprintf(f, "%d ", LirePixel(Im, i, j));
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
+    return 1;
+}
+
+#image.h
+#ifndef IMAGE_H
+#define IMAGE_H
+
+#include "matrice.h"
+
+struct sImage {
+    int L;
+    int C;
+    tMatrice pixel;
+};
+typedef struct sImage *tImage;
+
+tImage CreerImage(int L, int C);
+void DetruireImage(tImage *pIm);
+tImage LireImage(char nom[]);
+int EcrireImage(tImage Im, char nom[]);
+
+#define NbLig(Im)  (Im->L)
+#define NbCol(Im)  (Im->C)
+#define LirePixel(Im,i,j)  ((Im)->pixel[i][j])
+#define EcrirePixel(Im,i,j,v)  ((Im)->pixel[i][j]=(v))
+
+#endif
+
+
+#matrice.c
+#include "matrice.h"
+
+typedef unsigned char **tMatrice;
+
+//exo1
+//la verificacion se hahce con el cast del malloc
+tMatrice MatAllouer(int NbLig, int NbCol) {
+    unsigned char *elements;
+    tMatrice tab;
+    elements = (unsigned char *) malloc(NbLig * NbCol * sizeof(unsigned char));
+    if (elements == NULL) {
+        printf("Erreur : allocation des elements echouee.\n");
+        return NULL;
+    }
+    tab = (tMatrice) malloc(NbLig * sizeof(unsigned char *));
+    if (tab == NULL) {
+        printf("Erreur : allocation du tableau de pointeurs echouee.\n");
+        free(elements);
+        return NULL;
+    }
+    for (int i = 0; i < NbLig; i++) {
+        tab[i] = elements + i * NbCol;
+    }
+
+    return tab;
+}
+
+
+//exo 2
+tMatrice MatLire(int *pNbLig, int *pNbCol) {
+    int i, j;
+    tMatrice M;
+
+    printf("Nombre de lignes : ");
+    scanf("%d", pNbLig);
+    printf("Nombre de colonnes : ");
+    scanf("%d", pNbCol);
+
+    M = MatAllouer(*pNbLig, *pNbCol);
+    if (M == NULL) {
+        return NULL;
+    }
+
+    printf("Entrez les elements de la matrice :\n");
+    for (i = 0; i < *pNbLig; i++) {
+        for (j = 0; j < *pNbCol; j++) {
+            printf("M[%d][%d] = ", i, j);
+            scanf("%hhu", &M[i][j]); 
+        }
+    }
+
+    return M;
+}   
+
+
+//exo3
+void MatAfficher(tMatrice Mat, int NbLig, int NbCol) {
+    int i, j;
+    printf("Matrice (%d x %d) :\n", NbLig, NbCol);
+    for (i = 0; i < NbLig; i++) {
+        for (j = 0; j < NbCol; j++) {
+            printf("%3d ", Mat[i][j]); 
+        }
+        printf("\n");
+    }
+}
+
+//exo4
+tMatrice MatCopier(tMatrice Mat, int NbLig, int NbCol) {
+    tMatrice copie;
+    int i, j;
+
+    copie = MatAllouer(NbLig, NbCol);
+    if (copie == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < NbLig; i++) {
+        for (j = 0; j < NbCol; j++) {
+            copie[i][j] = Mat[i][j];
+        }
+    }
+
+    return copie;
+}
+
+
+//exo5
+void MatLiberer(tMatrice *pMat) {
+    if (pMat != NULL && *pMat != NULL) {
+        free((*pMat)[0]);
+        free(*pMat);     
+        *pMat = NULL;     
+    }
+}
+
+#matrice.h
+#ifndef MATRICE_H
+#define MATRICE_H
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Définition du type tMatrice (matrice d'octets dynamiques)
+typedef unsigned char **tMatrice;
+
+// Fonctions du module matrice
+extern tMatrice MatAllouer(int nbLignes, int nbColonnes);
+extern void MatLiberer(tMatrice *pMat);
+extern tMatrice MatLire(int *pNbLig, int *pNbCol);
+extern void MatAfficher(tMatrice mat, int nbLignes, int nbColonnes);
+extern tMatrice MatCopier(tMatrice Mat, int NbLig, int NbCol);
+
+#endif
+
+
+
 
 #ti.h
 #ifndef TI_H
