@@ -1,0 +1,160 @@
+
+#ti.h
+#ifndef TI_H
+#define TI_H
+
+#include "image.h"
+#include "matrice.h"
+
+tImage Rotation(tImage Im);
+tImage AppliquerTable(unsigned char Table[256], tImage Im);
+void RemplirTableInversion(unsigned char Table[256]);
+void RemplirTableGamma(double Gamma, unsigned char Table[256]);
+
+#endif
+
+#ti.c
+#include <stdio.h>
+#include <math.h>
+#include "ti.h"
+
+tImage Rotation(tImage Im){
+    int L = NbLig(Im);
+    int C = NbCol(Im);
+
+    tImage R = CreerImage(C, L);
+    if (R == NULL) return NULL;
+
+    int i, j;
+    for (i = 0; i < L; i++){
+        for (j = 0; j < C; j++){
+            EcrirePixel(R, j, L - 1 - i, LirePixel(Im, i, j));
+        }
+    }
+
+    return R;
+}
+
+tImage AppliquerTable(unsigned char Table[256], tImage Im){
+    int L = NbLig(Im);
+    int C = NbCol(Im);
+
+    tImage R = CreerImage(L, C);
+    if (R == NULL) return NULL;
+
+    int i, j;
+    unsigned char g;
+
+    for (i = 0; i < L; i++){
+        for (j = 0; j < C; j++){
+            g = LirePixel(Im, i, j);
+            EcrirePixel(R, i, j, Table[g]);
+        }
+    }
+
+    return R;
+}
+
+void RemplirTableInversion(unsigned char Table[256]){
+    int i;
+    for (i = 0; i < 256; i++){
+        Table[i] = 255 - i;
+    }
+}
+
+
+void RemplirTableGamma(double Gamma, unsigned char Table[256]){
+    int i;
+    double x;
+
+    for (i = 0; i < 256; i++){
+        x = (double)i / 255.0;
+        x = pow(x, Gamma);
+        x = x * 255.0;
+        Table[i] = (unsigned char)(round(x));
+    }
+}
+
+#tp9exo.c 
+#include <stdio.h>
+#include <stdlib.h>
+#include "image.h"
+#include "ti.h"
+
+int main(void){
+    tImage Im, Rot, Res;
+    char nom[50];
+    int choix;
+    unsigned char Table[256];
+    double gamma;
+
+    printf("Nom du fichier image PGM a charger: ");
+    scanf("%s", nom);
+
+    Im = LireImage(nom);
+    if (Im == NULL){
+        printf("Erreur de chargement.\n");
+        return 1;
+    }
+
+    printf("\n--- MENU ---\n");
+    printf("1 - Rotation 90 degres\n");
+    printf("2 - Inversion niveaux de gris (negatif)\n");
+    printf("3 - Correction gamma\n");
+    printf("Choix: ");
+    scanf("%d", &choix);
+
+    if (choix == 1){
+        Rot = Rotation(Im);
+        EcrireImage(Rot, "rotation.pgm");
+        printf("Image enregistree: rotation.pgm\n");
+        DetruireImage(&Rot);
+    }
+    else if (choix == 2){
+        RemplirTableInversion(Table);
+        Res = AppliquerTable(Table, Im);
+        EcrireImage(Res, "negatif.pgm");
+        printf("Image enregistree: negatif.pgm\n");
+        DetruireImage(&Res);
+    }
+    else if (choix == 3){
+        printf("Valeur de gamma: ");
+        scanf("%lf", &gamma);
+
+        RemplirTableGamma(gamma, Table);
+        Res = AppliquerTable(Table, Im);
+        EcrireImage(Res, "gamma.pgm");
+        printf("Image enregistree: gamma.pgm\n");
+        DetruireImage(&Res);
+    }
+    else{
+        printf("Choix invalide.\n");
+    }
+
+    DetruireImage(&Im);
+    return 0;
+}
+
+Makefile
+
+tp9ex: tp9ex.o ti.o image.o matrice.o
+	 gcc tp9ex.o ti.o image.o matrice.o -lm -o tp9ex
+
+tp9ex.o: tp9ex.c ti.h image.h matrice.h
+	 gcc -c tp9ex.c
+
+ti.o: ti.c ti.h image.h matrice.h
+	 gcc -c ti.c
+
+image.o: image.c image.h matrice.h
+	 gcc -c image.c
+
+matrice.o: matrice.c matrice.h
+	 gcc -c matrice.c
+
+clean:
+	 rm -f *.o tp9ex
+
+
+
+
